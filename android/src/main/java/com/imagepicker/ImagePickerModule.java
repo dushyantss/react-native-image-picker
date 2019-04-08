@@ -281,13 +281,13 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
     // Workaround for Android bug.
     // grantUriPermission also needed for KITKAT,
     // see https://code.google.com/p/android/issues/detail?id=76683
-    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-      List<ResolveInfo> resInfoList = reactContext.getPackageManager().queryIntentActivities(cameraIntent, PackageManager.MATCH_DEFAULT_ONLY);
-      for (ResolveInfo resolveInfo : resInfoList) {
-        String packageName = resolveInfo.activityInfo.packageName;
-        reactContext.grantUriPermission(packageName, cameraCaptureURI, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-      }
-    }
+//    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+//      List<ResolveInfo> resInfoList = reactContext.getPackageManager().queryIntentActivities(cameraIntent, PackageManager.MATCH_DEFAULT_ONLY);
+//      for (ResolveInfo resolveInfo : resInfoList) {
+//        String packageName = resolveInfo.activityInfo.packageName;
+//        reactContext.grantUriPermission(packageName, cameraCaptureURI, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//      }
+//    }
 
     try
     {
@@ -452,10 +452,21 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
     else
     {
       imageConfig = getResizedImage(reactContext, this.options, imageConfig, initialWidth, initialHeight, requestCode);
+
+      // some devices allow video anyways in photo only mode e.g Huawei Mate 20 Lite
+      if (imageConfig == null) {
+        responseHelper.invokeError(callback, "Unsupported file format");
+        return;
+      }
+
+      // We will send the original file back, if we could not resize the image
       if (imageConfig.resized == null)
       {
-        removeUselessFiles(requestCode, imageConfig);
-        responseHelper.putString("error", "Can't resize the image");
+        responseHelper.putInt("width", initialWidth);
+        responseHelper.putInt("height", initialHeight);
+        fileScan(reactContext, imageConfig.original.getAbsolutePath());
+//        removeUselessFiles(requestCode, imageConfig);
+//        responseHelper.putString("error", "Can't resize the image");
       }
       else
       {
