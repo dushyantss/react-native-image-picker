@@ -357,7 +357,7 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
   }
 
   @Override
-  public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
+  public void onActivityResult(int requestCode, int resultCode, Intent data) {
     //robustness code
     if (passResult(requestCode))
     {
@@ -456,6 +456,7 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
       // some devices allow video anyways in photo only mode e.g Huawei Mate 20 Lite
       if (imageConfig == null) {
         responseHelper.invokeError(callback, "Unsupported file format");
+        callback = null;
         return;
       }
 
@@ -495,7 +496,8 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
         removeUselessFiles(requestCode, imageConfig);
         final String errorMessage = new StringBuilder("Error moving image to camera roll: ")
                 .append(rolloutResult.error.getMessage()).toString();
-        responseHelper.putString("error", errorMessage);
+        responseHelper.invokeError(callback,  errorMessage);
+        callback = null;
         return;
       }
     }

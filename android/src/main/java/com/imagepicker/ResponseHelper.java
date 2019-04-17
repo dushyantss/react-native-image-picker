@@ -1,6 +1,7 @@
 package com.imagepicker;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
@@ -71,8 +72,12 @@ public class ResponseHelper
         invokeResponse(callback);
     }
 
-    public void invokeResponse(@NonNull final Callback callback)
+    public void invokeResponse(final Callback callback)
     {
-        callback.invoke(response);
+        try {
+            if (callback != null) callback.invoke(response);
+        } catch (Exception e) {
+            Log.e("ResponseHelper", "Fatal exception in invokeResponse");
+        }
     }
 }
